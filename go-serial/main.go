@@ -40,4 +40,14 @@ func main() {
 			log.Fatal("Cannot write bytes. ", err)
 		}
 	}
+
+	for i := 0; i < 10; i++ {
+		time.Sleep(time.Second * 2)
+		_, err = s.Write([]byte("GENRAND"))
+		time.Sleep(time.Second * 1)
+		fmt.Println("sent")
+		if err != nil {
+			log.Fatal("Cannot write bytes. ", err)
+		}
+	}
 }

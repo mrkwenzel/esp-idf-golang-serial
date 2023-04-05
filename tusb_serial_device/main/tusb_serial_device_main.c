@@ -10,10 +10,37 @@
 #include "tinyusb.h"
 #include "tusb_cdc_acm.h"
 #include "sdkconfig.h"
+#include "driver/gpio.h"
+#include "bootloader_random.h"
+#include "esp_random.h"
+
+
+#define STATUS_GPIO GPIO_NUM_15
+
+#define LED_STATE_ON 1
+#define LED_STATE_OFF 0
+
+#define BITS_256 256
+#define BITS_128 128
+
 
 static uint8_t buf[CONFIG_TINYUSB_CDC_RX_BUFSIZE + 1];
 
 char RESP_CMD[]                 = "GENJOKE";
+char RESP_CMD2[]                = "GENRAND";
+
+static void configure_led(void)
+{
+    gpio_reset_pin(STATUS_GPIO);
+    /* Set the GPIO as a push/pull output */
+    gpio_set_direction(STATUS_GPIO, GPIO_MODE_OUTPUT);
+}
+
+static void set_led(uint8_t led_state)
+{
+    /* Set the GPIO level according to the state (LOW or HIGH)*/
+    gpio_set_level(STATUS_GPIO, led_state);
+}
 
 void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
 {
@@ -34,11 +61,21 @@ void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
         /* write back */
         tinyusb_cdcacm_write_queue(itf, conbuf, 16);
         tinyusb_cdcacm_write_flush(itf, 0);
+    } else if (strcmp((const char *)buf, RESP_CMD2) == 0) {
+        set_led(LED_STATE_ON);
+        uint8_t randval[BITS_256/8];
+        esp_fill_random(randval, sizeof(randval));
+        tinyusb_cdcacm_write_queue(itf, randval, BITS_256/8);
+        tinyusb_cdcacm_write_flush(itf, 0);
     }
 }
 
 void app_main(void)
 {
+    bootloader_random_enable();
+
+    configure_led();
+
     const tinyusb_config_t tusb_cfg = {
         .device_descriptor = NULL,
         .string_descriptor = NULL,
