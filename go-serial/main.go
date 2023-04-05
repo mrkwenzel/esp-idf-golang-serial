@@ -35,7 +35,7 @@ func main() {
 		time.Sleep(time.Second * 2)
 		_, err = s.Write([]byte("GENJOKE"))
 		time.Sleep(time.Second * 1)
-		fmt.Println("sent")
+		fmt.Println("sent genjoke")
 		if err != nil {
 			log.Fatal("Cannot write bytes. ", err)
 		}
@@ -45,7 +45,7 @@ func main() {
 		time.Sleep(time.Second * 2)
 		_, err = s.Write([]byte("GENRAND"))
 		time.Sleep(time.Second * 1)
-		fmt.Println("sent")
+		fmt.Println("sent genrand")
 		if err != nil {
 			log.Fatal("Cannot write bytes. ", err)
 		}
