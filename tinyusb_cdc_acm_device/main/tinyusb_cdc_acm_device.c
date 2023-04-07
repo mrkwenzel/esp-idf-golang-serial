@@ -108,5 +108,5 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(tusb_cdc_acm_init(&acm_cfg));
-    //esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
+    esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 }
