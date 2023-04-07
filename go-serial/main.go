@@ -14,7 +14,8 @@ func scannSerialRX(s *serial.Port) {
 
 	scanner := bufio.NewScanner(s)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		fmt.Printf("%q\n", scanner.Text())
+
 	}
 
 	if scanner.Err() != nil {
@@ -22,6 +23,7 @@ func scannSerialRX(s *serial.Port) {
 	}
 }
 
+// working example using bufio
 func main() {
 	c := &serial.Config{Name: "/dev/cu.usbmodem1234561", Baud: 115200}
 	s, err := serial.OpenPort(c)
@@ -32,20 +34,8 @@ func main() {
 	go scannSerialRX(s)
 
 	for i := 0; i < 10; i++ {
-		time.Sleep(time.Second * 2)
-		_, err = s.Write([]byte("GENJOKE"))
-		time.Sleep(time.Second * 1)
-		fmt.Println("sent genjoke")
-		if err != nil {
-			log.Fatal("Cannot write bytes. ", err)
-		}
-	}
-
-	for i := 0; i < 10; i++ {
-		time.Sleep(time.Second * 2)
 		_, err = s.Write([]byte("GENRAND"))
 		time.Sleep(time.Second * 1)
-		fmt.Println("sent genrand")
 		if err != nil {
 			log.Fatal("Cannot write bytes. ", err)
 		}
