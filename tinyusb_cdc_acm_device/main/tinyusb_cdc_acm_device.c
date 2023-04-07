@@ -26,7 +26,7 @@
 #define BITS_256 256
 #define BITS_128 128
 
-static const char *TAG = "esp-hsm";
+static const char *TAG = "esprandnum";
 static const char *prefix = "SAS";
 static const char *suffix = "KIA";
 static const char *nl = "\n";
