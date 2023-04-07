@@ -4,11 +4,14 @@
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
 
+#include <stdio.h>
 #include <stdint.h>
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "tinyusb.h"
 #include "tusb_cdc_acm.h"
+#include "tusb_console.h"
 #include "sdkconfig.h"
 #include "driver/gpio.h"
 #include "bootloader_random.h"
@@ -23,7 +26,10 @@
 #define BITS_256 256
 #define BITS_128 128
 
-
+static const char *TAG = "esp-hsm";
+static const char *prefix = "SAS";
+static const char *suffix = "KIA";
+static const char *nl = "\n";
 static uint8_t buf[CONFIG_TINYUSB_CDC_RX_BUFSIZE + 1];
 
 char RESP_CMD[]                 = "GENJOKE";
@@ -56,6 +62,8 @@ void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
 
     if (strcmp((const char *)buf, RESP_CMD) == 0)
     {
+        ESP_LOGI(TAG, "log -> USB");
+        fprintf(stdout, "example: print -> stdout\n");
         unsigned char conbuf[32] = {'{','"','j','o','k','e','"',':','"','t','e','s','t','"', '}', '\n'};
 
         /* write back */
@@ -65,7 +73,11 @@ void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
         set_led(LED_STATE_ON);
         uint8_t randval[BITS_256/8];
         esp_fill_random(randval, sizeof(randval));
+
+        tinyusb_cdcacm_write_queue(itf, (const unsigned char*)prefix, 3);
         tinyusb_cdcacm_write_queue(itf, randval, BITS_256/8);
+        tinyusb_cdcacm_write_queue(itf, (const unsigned char*)suffix, 3);
+        tinyusb_cdcacm_write_queue(itf, (const unsigned char*)nl, 1);
         tinyusb_cdcacm_write_flush(itf, 0);
     }
 }
@@ -96,4 +108,5 @@ void app_main(void)
     };
 
     ESP_ERROR_CHECK(tusb_cdc_acm_init(&acm_cfg));
+    //esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 }
